@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { UploadComponent } from "./uploadcomponent";
+import { JSX, SVGProps } from "react";
 
 export function Landingpage() {
   return (
@@ -55,9 +59,31 @@ export function Landingpage() {
                 Capture a photo and let our AI transform it into a stunning
                 visual representation of the past.
               </p>
-              <Button size="lg" className="px-8 py-3 rounded-full">
+
+              <Button
+                size="lg"
+                className="px-8 py-3 rounded-full"
+                onClick={() => {
+                  const uploadContainer =
+                    document.getElementById("upload-container");
+                  if (uploadContainer) {
+                    uploadContainer.style.display = "flex";
+                  }
+                }}
+              >
                 Upload Photo
               </Button>
+              <div
+                id="upload-container"
+                className="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 justify-center items-center"
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) {
+                    e.currentTarget.style.display = "none";
+                  }
+                }}
+              >
+                <UploadComponent />
+              </div>
             </div>
           </div>
         </section>
@@ -222,7 +248,7 @@ export function Landingpage() {
   );
 }
 
-function CameraIcon(props) {
+function CameraIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -242,7 +268,9 @@ function CameraIcon(props) {
   );
 }
 
-function CircleCheckIcon(props) {
+function CircleCheckIcon(
+  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
+) {
   return (
     <svg
       {...props}
