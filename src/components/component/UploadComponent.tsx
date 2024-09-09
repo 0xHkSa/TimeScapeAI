@@ -10,17 +10,43 @@ import {
 } from "@/components/ui/card";
 
 export function UploadComponent() {
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const handleFileUpload = (e: any) => {
-    setFile(e.target.files[0]);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
     setUploading(true);
-    setTimeout(() => {
-      setUploading(false);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      console.log("Upload successful:", data);
       setUploadComplete(true);
-    }, 2000);
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError("Failed to upload image. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
