@@ -27,7 +27,7 @@ export default function UploadComponent() {
     formData.append("image", file);
 
     try {
-      const response = await fetch("http://localhost:5001/api/upload", {
+      const response = await fetch("http://localhost:5002/api/upload", {
         method: "POST",
         body: formData,
       });

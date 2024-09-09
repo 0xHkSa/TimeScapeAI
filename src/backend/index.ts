@@ -8,7 +8,6 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import cors from "cors";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import ImageSchema from "./models/Image";
 
 const uploadsDir = path.join(process.cwd(), "temp_uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -19,7 +18,7 @@ const __dirname = dirname(__filename);
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 
 app.use(
   cors({
@@ -54,19 +53,19 @@ const connectWithRetry = () => {
     });
 };
 
-connectWithRetry();
+// connectWithRetry();
 
-mongoose.connection.on("disconnected", () => {
-  console.log("MongoDB disconnected. Attempting to reconnect...");
-  connectWithRetry();
-});
+// mongoose.connection.on("disconnected", () => {
+//   console.log("MongoDB disconnected. Attempting to reconnect...");
+//   connectWithRetry();
+// });
 
-mongoose.connection.on("error", (err) => {
-  console.error("MongoDB connection error:", err);
-  if (err.name === "MongoNetworkError") {
-    connectWithRetry();
-  }
-});
+// mongoose.connection.on("error", (err) => {
+//   console.error("MongoDB connection error:", err);
+//   if (err.name === "MongoNetworkError") {
+//     connectWithRetry();
+//   }
+// });
 
 // Configure S3 client
 const s3Client = new S3Client({
@@ -75,12 +74,6 @@ const s3Client = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
-});
-// Update image schema
-const updatedImageSchema = new mongoose.Schema({
-  filename: { type: String, required: true },
-  s3Url: { type: String, required: true },
-  uploadedAt: { type: Date, default: Date.now },
 });
 
 // Middleware
@@ -125,15 +118,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// // Image Schema -- restructure
-// const imageSchema = new mongoose.Schema({
-//   filename: { type: String, required: true },
-//   s3Url: { type: String, required: true },
-//   uploadedAt: { type: Date, default: Date.now },
-// });
+// Image Schema -- restructure
+const imageSchema = new mongoose.Schema({
+  filename: { type: String, required: true },
+  s3Url: { type: String, required: true },
+  uploadedAt: { type: Date, default: Date.now },
+});
 
 // Image Model
-const Image = mongoose.model("Image", ImageSchema);
+const Image = mongoose.model("Image", imageSchema);
 
 // Test route
 app.get("/api/hello", async (req, res) => {
