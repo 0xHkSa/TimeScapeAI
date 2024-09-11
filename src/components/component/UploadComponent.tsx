@@ -8,12 +8,15 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export function UploadComponent() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadResult, setUploadResult] = useState<string | null>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -22,16 +25,17 @@ export function UploadComponent() {
     setFile(selectedFile);
     setUploading(true);
     setError(null);
+    setUploadComplete(false);
+    setUploadResult(null);
 
     const formData = new FormData();
     formData.append("image", selectedFile);
 
     try {
-      const response = await fetch("/api/upload", {
+      const response = await fetch("http://localhost:5002/api/upload", {
         method: "POST",
         body: formData,
       });
-
       if (!response.ok) {
         throw new Error("Upload failed");
       }
@@ -88,6 +92,20 @@ export function UploadComponent() {
                   Upload complete!
                 </span>
               </div>
+            )}
+            {uploadComplete && (
+              <Link href="/view-generation" passHref>
+                <Button
+                  variant="outline"
+                  className="mt-4 text-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  <span className="mr-2">🔍</span>
+                  Open Your Window to the Past
+                </Button>
+              </Link>
+            )}
+            {error && (
+              <div className="text-sm font-medium text-red-500">{error}</div>
             )}
             <div className="flex items-center gap-2">
               <img

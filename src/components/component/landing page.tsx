@@ -2,10 +2,37 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { UploadComponent } from "./uploadcomponent";
+import { UploadComponent } from "./UploadComponent";
 import { JSX, SVGProps } from "react";
+import { useState } from "react";
 
-export function Landingpage() {
+export default function LandingPage() {
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+
+  const startCamera = () => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          setCameraStream(stream);
+          const videoElement = document.getElementById(
+            "camera-feed"
+          ) as HTMLVideoElement;
+          if (videoElement) {
+            videoElement.srcObject = stream;
+          }
+          const cameraContainer = document.getElementById("camera-container");
+          if (cameraContainer) {
+            cameraContainer.style.display = "flex";
+          }
+        })
+        .catch((error) => {
+          console.error("Error accessing camera:", error);
+        });
+    } else {
+      console.error("getUserMedia is not supported on this device");
+    }
+  };
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <header className="px-4 lg:px-6 h-14 flex items-center">
@@ -83,6 +110,65 @@ export function Landingpage() {
                 }}
               >
                 <UploadComponent />
+              </div>
+              <div>
+                <Button
+                  size="lg"
+                  className="px-8 py-3 rounded-full"
+                  onClick={startCamera}
+                >
+                  Take a Photo
+                </Button>
+              </div>
+              <div
+                id="camera-container"
+                className="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 justify-center items-center"
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) {
+                    e.currentTarget.style.display = "none";
+                    if (cameraStream) {
+                      cameraStream.getTracks().forEach((track) => track.stop());
+                      setCameraStream(null);
+                    }
+                  }
+                }}
+              >
+                <div className="bg-white p-6 rounded-lg">
+                  <video
+                    id="camera-feed"
+                    autoPlay
+                    playsInline
+                    className="mb-4"
+                  ></video>
+                  <Button
+                    onClick={() => {
+                      const videoElement = document.getElementById(
+                        "camera-feed"
+                      ) as HTMLVideoElement;
+                      const canvas = document.createElement("canvas");
+                      canvas.width = videoElement.videoWidth;
+                      canvas.height = videoElement.videoHeight;
+                      canvas.getContext("2d")?.drawImage(videoElement, 0, 0);
+                      const imageDataUrl = canvas.toDataURL("image/jpeg");
+                      // Here you can handle the captured image data
+                      console.log("Captured image:", imageDataUrl);
+                      // Close the camera modal and stop the stream
+                      const cameraContainer =
+                        document.getElementById("camera-container");
+                      if (cameraContainer) {
+                        cameraContainer.style.display = "none";
+                      }
+                      if (cameraStream) {
+                        cameraStream
+                          .getTracks()
+                          .forEach((track) => track.stop());
+                        setCameraStream(null);
+                      }
+                    }}
+                  >
+                    Capture Photo
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
