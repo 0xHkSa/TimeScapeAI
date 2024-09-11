@@ -22,9 +22,9 @@ const PORT = process.env.PORT || 5002;
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // Allow your frontend origin
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -52,20 +52,6 @@ const connectWithRetry = () => {
       setTimeout(connectWithRetry, 5000); // Retry after 5 seconds
     });
 };
-
-// connectWithRetry();
-
-// mongoose.connection.on("disconnected", () => {
-//   console.log("MongoDB disconnected. Attempting to reconnect...");
-//   connectWithRetry();
-// });
-
-// mongoose.connection.on("error", (err) => {
-//   console.error("MongoDB connection error:", err);
-//   if (err.name === "MongoNetworkError") {
-//     connectWithRetry();
-//   }
-// });
 
 // Configure S3 client
 const s3Client = new S3Client({
@@ -195,10 +181,6 @@ app.post("/api/upload", upload.single("image"), async (req, res) => {
 
     await newImage.save();
     console.log("Image saved to database");
-
-    // // Delete local file after upload
-    // fs.unlinkSync(req.file.path);
-    // console.log("Local file deleted");
 
     res.status(201).json({
       message: "Image uploaded successfully",
