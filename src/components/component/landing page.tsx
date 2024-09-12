@@ -5,9 +5,22 @@ import { Button } from "@/components/ui/button";
 import { UploadComponent } from "./UploadComponent";
 import { JSX, SVGProps } from "react";
 import { useState } from "react";
+import { client } from "@/app/client";
+import { ConnectButton } from "thirdweb/react";
+import { inAppWallet, createWallet } from "thirdweb/wallets";
 
 export default function LandingPage() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+
+  const wallets = [
+    inAppWallet({
+      auth: {
+        options: ["google", "email", "passkey", "phone"],
+      },
+    }),
+    createWallet("io.metamask"),
+    createWallet("com.coinbase.wallet"),
+  ];
 
   const startCamera = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -44,7 +57,7 @@ export default function LandingPage() {
           <CameraIcon className="h-6 w-6" />
           <span className="sr-only">TimeScape AI</span>
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
+        <nav className="ml-auto flex items-center gap-4 sm:gap-6">
           <Link
             href="#"
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -73,6 +86,20 @@ export default function LandingPage() {
           >
             Contact
           </Link>
+          <ConnectButton
+            client={client}
+            wallets={wallets}
+            connectButton={{
+              label: "Log in",
+              className: "px-8 py-3 rounded-full text-sm font-medium",
+              style: { 
+                backgroundColor: "#1d1d38", 
+                color: "white", 
+                borderRadius: "9999px"
+            }
+            }}
+            connectModal={{ size: "compact", title: "Sign in" }}
+          />
         </nav>
       </header>
       <main className="flex-1">
