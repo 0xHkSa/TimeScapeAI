@@ -4,15 +4,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { useActiveAccount } from "thirdweb/react";
+import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { client } from "@/app/client";
 
 export default function Gallery() {
   const account = useActiveAccount();
   console.log(account);
+
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
-      <main className="flex-1 grid gap-6 p-6 md:p-10">
-        {!account ? (
+      <main className="flex-1 grid gap-4 p-6 md:p-10">
+        {account ? (
           <section>
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Your Gallery</h2>
@@ -48,11 +50,13 @@ export default function Gallery() {
             </div>
           </section>
         ) : (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">
-              Connect your wallet to view your gallery
-            </h2>
-            <Button>Connect Wallet</Button>
+          <div className="flex flex-col items-center justify-center h-64 text-center p-4">
+            <div>
+              <h2 className="text-2xl font-bold mt-4 mb-2">
+                Sign in to view your gallery
+              </h2>
+            </div>
+            <ConnectButton client={client} />
           </div>
         )}
 
