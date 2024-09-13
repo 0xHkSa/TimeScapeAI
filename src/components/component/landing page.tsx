@@ -15,7 +15,7 @@ export default function LandingPage() {
   const wallets = [
     inAppWallet({
       auth: {
-        options: ["google", "email", "passkey", "phone"],
+        options: ["google", "email", "passkey"],
       },
     }),
     createWallet("io.metamask"),
@@ -92,13 +92,17 @@ export default function LandingPage() {
             connectButton={{
               label: "Log in",
               className: "px-8 py-3 rounded-full text-sm font-medium",
-              style: { 
-                backgroundColor: "#1d1d38", 
-                color: "white", 
-                borderRadius: "9999px"
-            }
+              style: {
+                backgroundColor: "#1d1d38",
+                color: "white",
+                borderRadius: "9999px",
+              },
             }}
-            connectModal={{ size: "compact", title: "Sign in" }}
+            connectModal={{
+              size: "compact",
+              title: "Sign in",
+              showThirdwebBranding: false,
+            }}
           />
         </nav>
       </header>
