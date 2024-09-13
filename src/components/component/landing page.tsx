@@ -13,7 +13,6 @@ export default function LandingPage() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
 
-
   const startCamera = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
