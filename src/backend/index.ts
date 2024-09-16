@@ -8,6 +8,9 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import cors from "cors";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import Replicate from "replicate";
+
+import imageGenerationRouter from "./routes/imageGeneration";
 
 const uploadsDir = path.join(process.cwd(), "temp_uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -20,6 +23,7 @@ dotenv.config({ path: `${__dirname}/../../.env` });
 const app = express();
 const PORT = process.env.PORT || 5002;
 
+// CORS
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -63,12 +67,10 @@ const s3Client = new S3Client({
 });
 
 // Middleware
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // DB
-
 if (!MONGODB_URI) {
   console.error("MONGODB_URI is not defined in the environment variables");
   process.exit(1);
@@ -92,6 +94,7 @@ mongoose
     console.error("MongoDB connection error:", error);
     process.exit(1);
   });
+
 // Multer file storage -- restructure
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -113,6 +116,9 @@ const imageSchema = new mongoose.Schema({
 
 // Image Model
 const Image = mongoose.model("Image", imageSchema);
+
+// ROUTES
+app.use("/api/images", imageGenerationRouter);
 
 // Test route
 app.get("/api/hello", async (req, res) => {
@@ -144,6 +150,7 @@ app.get("/api/hello", async (req, res) => {
     });
   }
 });
+
 // POST upload image -- restructure
 app.post("/api/upload", upload.single("image"), async (req, res) => {
   try {
