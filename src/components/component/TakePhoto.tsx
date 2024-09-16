@@ -1,11 +1,15 @@
 import React, { useState, useRef } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
-const TakePhoto = ({ onPhotoTaken }) => {
-  const [cameraStream, setCameraStream] = useState(null);
-  const videoRef = useRef(null);
+interface TakePhotoProps {
+  onPhotoTaken: (photoDataUrl: string) => void;
+}
 
-  const startCamera = async () => {
+const TakePhoto: React.FC<TakePhotoProps> = ({ onPhotoTaken }) => {
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const startCamera = async (): Promise<void> => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       setCameraStream(stream);
@@ -17,22 +21,25 @@ const TakePhoto = ({ onPhotoTaken }) => {
     }
   };
 
-  const stopCamera = () => {
+  const stopCamera = (): void => {
     if (cameraStream) {
       cameraStream.getTracks().forEach((track) => track.stop());
       setCameraStream(null);
     }
   };
 
-  const capturePhoto = () => {
+  const capturePhoto = (): void => {
     if (videoRef.current) {
       const canvas = document.createElement("canvas");
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
-      canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
-      const photoDataUrl = canvas.toDataURL("image/jpeg");
-      onPhotoTaken(photoDataUrl);
-      stopCamera();
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0);
+        const photoDataUrl = canvas.toDataURL("image/jpeg");
+        onPhotoTaken(photoDataUrl);
+        stopCamera();
+      }
     }
   };
 
