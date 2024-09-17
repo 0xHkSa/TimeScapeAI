@@ -1,6 +1,9 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "../config/s3";
 import { S3_BUCKET_NAME } from "../config/env";
+import { upload } from "thirdweb/storage";
+import { createThirdwebClient } from "thirdweb";
+import { THIRDWEB_CLIENT_ID } from "../config/env";
 import Image from "../models/Image";
 import fs from "fs";
 
@@ -31,6 +34,26 @@ export const uploadImageToS3 = async (file: Express.Multer.File) => {
     s3Url: newImage.s3Url,
   };
 };
+
+// store reutrn image to THIRDWEB > IPFS
+export async function uploadImageToThirdWeb(imageUrl: string) {
+  const client = createThirdwebClient({
+    clientId: THIRDWEB_CLIENT_ID,
+  });
+
+  // Fetch the image from the URL
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  const file = new File([blob], "generated-image.webp", { type: "image/webp" });
+
+  const uri = await upload({
+    client,
+    files: [file],
+  });
+
+  console.log("Uploaded image URI: ", uri);
+  return uri;
+}
 
 // do we need a new s3 bucket to pull from
 // strore result image to s3 from replicate result
