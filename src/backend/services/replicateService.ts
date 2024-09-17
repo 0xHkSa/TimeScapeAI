@@ -8,7 +8,7 @@ const replicate = new Replicate({
 export async function generateImage(prompt: string): Promise<string> {
   try {
     const output = await replicate.run(
-      "0xhksa/flux-timescape:8aaeebc206942763091f78ac05c3f657be91ad8598f9c06bcaea97a54a34f847",
+      "0xhksa/flux-timescape:1ccb087b6fc277f0e3b73f4e78c24ffe438ac262859673475fa3ae96e0e0adde",
       {
         input: { prompt },
       }
