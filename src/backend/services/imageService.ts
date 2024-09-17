@@ -35,7 +35,7 @@ export const uploadImageToS3 = async (file: Express.Multer.File) => {
   };
 };
 
-// store reutrn image to THIRDWEB > IPFS
+// store return image to THIRDWEB > IPFS
 export async function uploadImageToThirdWeb(imageUrl: string) {
   const client = createThirdwebClient({
     clientId: THIRDWEB_CLIENT_ID,
@@ -54,22 +54,6 @@ export async function uploadImageToThirdWeb(imageUrl: string) {
   console.log("Uploaded image URI: ", uri);
   return uri;
 }
-
-// do we need a new s3 bucket to pull from
-// strore result image to s3 from replicate result
-// export const uplaodReplicateImage = async (file: Express.Multer.File) => {
-//   const fileStream = fs.createReadStream(file.path);
-//   const uploadParams = {
-//     Bucket: S3_BUCKET_NAME,
-//     Key: `uploads/${Date.now()}-${file.originalname}`,
-//     Body: fileStream,
-//   };
-
-//   const command = new PutObjectCommand(uploadParams);
-//   await s3Client.send(command);
-
-//   const s3url =
-// };
 
 export const getAllImages = async () => {
   return Image.find();
