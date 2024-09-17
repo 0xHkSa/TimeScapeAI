@@ -4,12 +4,65 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { ConnectButton, MediaRenderer, useActiveAccount } from "thirdweb/react";
 import { client } from "@/app/client";
+import { getContract } from "thirdweb";
+import { useEffect, useState } from "react";
+import { baseSepolia } from "thirdweb/chains";
+import { getOwnedNFTs, getNFTs } from "thirdweb/extensions/erc1155";
 
 export default function Gallery() {
   const account = useActiveAccount();
-  console.log(account);
+  const [ownedNFTs, setOwnedNFTs] = useState<any[]>([]);
+  const [allNFTs, setAllNFTs] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchNFTs() {
+      const contract = getContract({
+        client,
+        address: "0xD37B25c14E4F538A2C17aEC2Ba90a1105a35BC8B",
+        chain: baseSepolia,
+      });
+
+      // Fetch all NFTs
+      const allNFTsData = await getNFTs({ contract });
+      console.log("All NFTs:", allNFTsData);
+      setAllNFTs(allNFTsData);
+
+      // Fetch owned NFTs if account is connected
+      if (account) {
+        const ownedNFTsData = await getOwnedNFTs({
+          contract,
+          address: account.address,
+        });
+        setOwnedNFTs(ownedNFTsData);
+      }
+    }
+
+    fetchNFTs();
+  }, [account]);
+
+  useEffect(() => {
+    async function fetchOwnedNFTs() {
+      if (account) {
+        const contract = getContract({
+          client,
+          address: "0xD37B25c14E4F538A2C17aEC2Ba90a1105a35BC8B",
+          chain: baseSepolia,
+        });
+
+        const nfts = await getOwnedNFTs({
+          contract,
+          address: account.address,
+        });
+
+        setOwnedNFTs(nfts as any[]);
+      }
+    }
+    console.log(ownedNFTs);
+
+    fetchOwnedNFTs();
+  }, [account]);
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
@@ -27,20 +80,21 @@ export default function Gallery() {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-6">
-              {[...Array(10)].map((_, i) => (
+              {ownedNFTs.map((nft, i) => (
                 <Link
                   key={i}
                   href="#"
                   className="group relative overflow-hidden rounded-lg"
                   prefetch={false}
                 >
-                  <img
-                    src="/placeholder.svg"
-                    alt={`Image ${i + 1}`}
+                  <MediaRenderer
+                    src={nft.metadata.image || "/placeholder.svg"}
+                    alt={nft.metadata.name || `NFT ${i + 1}`}
                     width="300"
                     height="300"
                     className="w-full h-full object-cover transition-all group-hover:scale-110"
                     style={{ aspectRatio: "300/300", objectFit: "cover" }}
+                    client={client}
                   />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <MaximizeIcon className="w-6 h-6 text-white" />
@@ -81,22 +135,25 @@ export default function Gallery() {
               />
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {[...Array(10)].map((_, i) => (
+              {allNFTs.map((nft, i) => (
                 <Card key={i} className="border-0 shadow-none">
                   <CardContent className="p-0">
-                    <img
-                      src="/placeholder.svg"
-                      alt={`Prompt ${i + 1}`}
+                    <MediaRenderer
+                      src={nft.metadata.image || "/placeholder.svg"}
+                      alt={nft.metadata.name || `NFT ${i + 1}`}
                       width="200"
                       height="200"
                       className="w-full h-full object-cover rounded-t-lg"
                       style={{ aspectRatio: "200/200", objectFit: "cover" }}
+                      client={client}
                     />
                   </CardContent>
                   <CardFooter className="bg-muted text-muted-foreground p-3 rounded-b-lg">
-                    <div className="font-medium">Prompt {i + 1}</div>
+                    <div className="font-medium">
+                      {nft.metadata.name || `NFT ${i + 1}`}
+                    </div>
                     <div className="text-sm">
-                      A detailed description of the image prompt.
+                      {nft.metadata.description || "No description available."}
                     </div>
                   </CardFooter>
                 </Card>
