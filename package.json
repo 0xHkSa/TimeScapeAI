@@ -8,8 +8,9 @@
     "build": "next build",
     "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "start:frontend": "next dev",
-    "start:backend": "node --loader ts-node/esm --no-warnings src/backend/index.ts",
-    "lint": "next lint"
+    "start:backend": "NODE_NO_WARNINGS=1 node --loader ts-node/esm --experimental-specifier-resolution=node src/backend/index.ts",
+    "lint": "next lint",
+    "test:replicate": "node src/backend/test-replicate.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.645.0",
@@ -29,6 +30,7 @@
     "next": "14.2.7",
     "react": "^18.3.1",
     "react-dom": "^18",
+    "replicate": "^0.32.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "thirdweb": "^5.55.0"
