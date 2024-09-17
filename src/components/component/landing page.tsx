@@ -12,7 +12,6 @@ import { inAppWallet, createWallet } from "thirdweb/wallets";
 export default function LandingPage() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
-
   const startCamera = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
@@ -137,7 +136,10 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        <section className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48">
+        <section
+          id="about"
+          className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48"
+        >
           <div className="container px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -194,7 +196,10 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        <section className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48 bg-muted">
+        <section
+          id="features"
+          className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48 bg-muted"
+        >
           <div className="container px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-4">
@@ -273,7 +278,10 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+      <footer
+        id="contact"
+        className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t"
+      >
         <p className="text-xs text-muted-foreground">
           &copy; 2024 TimeScape AI. All rights reserved.
         </p>
