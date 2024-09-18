@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ConnectButton, MediaRenderer, useActiveAccount } from "thirdweb/react";
 import { client } from "@/app/client";
 import { getContract } from "thirdweb";
-import { useEffect, useState } from "react";
+import { JSX, SVGProps, useEffect, useState } from "react";
 import { baseSepolia } from "thirdweb/chains";
 import { getOwnedNFTs, getNFTs } from "thirdweb/extensions/erc1155";
 
@@ -166,7 +166,9 @@ export default function Gallery() {
   );
 }
 
-function MaximizeIcon(props) {
+function MaximizeIcon(
+  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
+) {
   return (
     <svg
       {...props}
@@ -188,7 +190,7 @@ function MaximizeIcon(props) {
   );
 }
 
-function SearchIcon(props) {
+function SearchIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

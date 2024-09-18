@@ -22,7 +22,7 @@ const wallets = [
   createWallet("com.coinbase.wallet"),
 ];
 export function Header() {
-const pathname = usePathname();
+  const pathname = usePathname();
 
   const navItems = [
     { name: "Features", href: "/#features" },
@@ -39,7 +39,8 @@ const pathname = usePathname();
         prefetch={false}
         aria-label="Home"
       >
-        <CameraIcon className="h-6 w-6" />
+        <CameraIcon className="h-6 w-6 mr-2" />
+        <span className="text-lg font-semibold">Time Scape AI</span>
       </Link>
       <nav className="ml-auto flex items-center gap-4 sm:gap-6">
         {navItems.map(({ name, href }) => (

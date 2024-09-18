@@ -39,7 +39,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <main className="flex-1">
-        <section className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48 bg-gradient-to-r from-[#6F2DA8] to-[#9370DB]">
+        <section className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48 bg-gradient-to-r from-[#6F2DA8] to-[#9370DB] mt-8">
           <div className="container px-4 md:px-6 text-center">
             <div className="max-w-3xl mx-auto space-y-6">
               <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl">
@@ -144,7 +144,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <img
-                  src="/placeholder.svg"
+                  src="https://replicate.delivery/yhqm/nnQQvx7MILa7EdnCgXImhP80phx5rzi7tNsbM6w9OvPoOfuJA/out-0.webp"
                   width={600}
                   height={400}
                   alt="TimeScape AI Sample"
@@ -161,7 +161,7 @@ export default function LandingPage() {
               </div>
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <img
-                  src="/placeholder.svg"
+                  src="https://replicate.delivery/yhqm/oGiRj2k5NWalJNavgss9lfdJtfSMK4Tn8om2OGiAZMDZ98dTA/out-0.png"
                   width={600}
                   height={400}
                   alt="TimeScape AI Sample"
@@ -178,7 +178,7 @@ export default function LandingPage() {
               </div>
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <img
-                  src="/placeholder.svg"
+                  src="https://replicate.delivery/yhqm/okvcpPCj9zqEH12vEOpAEQvPgqPEfvykb1Okcjvzge0798dTA/out-0.png"
                   width={600}
                   height={400}
                   alt="TimeScape AI Sample"
