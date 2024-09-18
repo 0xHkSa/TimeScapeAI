@@ -61,6 +61,7 @@ export const processUploadedImage = async (file: Express.Multer.File) => {
 
     // Database Update
     const newImage = new Image({
+      filename: file.filename,
       fileName: file.originalname,
       s3Url: s3Result,
       generatedImageUrl: generatedImageUrl,
