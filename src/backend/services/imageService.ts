@@ -8,6 +8,10 @@ import { generateImage } from "./replicateService";
 import Image from "../models/Image";
 import fs from "fs";
 
+// updating for node.js specific file/blob approach
+import { File } from "@web-std/file";
+import fetch, { Blob } from "node-fetch";
+
 const thirdwebClient = createThirdwebClient({
   clientId: THIRDWEB_CLIENT_ID,
 });
@@ -33,12 +37,14 @@ export const uploadImageToThirdWeb = async (
 ): Promise<string> => {
   // Fetch the image from the URL
   const response = await fetch(imageUrl);
-  const blob = await response.blob();
-  const file = new File([blob], "generated-image.webp", { type: "image/webp" });
+  // Get the binary data as an ArrayBuffer
+  const arrayBuffer = await response.arrayBuffer();
+  // Convert ArrayBuffer to Buffer
+  const buffer = Buffer.from(arrayBuffer);
 
   const uri = await upload({
     client: thirdwebClient,
-    files: [file],
+    files: [new File([buffer], "image.webp", { type: "image/webp" })],
   });
 
   console.log("Uploaded image URI: ", uri);
