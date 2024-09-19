@@ -7,8 +7,6 @@ import { THIRDWEB_CLIENT_ID } from "../config/env";
 import { generateImage } from "./replicateService";
 import Image from "../models/Image";
 import fs from "fs";
-
-// updating for node.js specific file/blob approach
 import { File } from "@web-std/file";
 import fetch, { Blob } from "node-fetch";
 
