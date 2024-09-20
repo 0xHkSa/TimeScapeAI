@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { JSX, SVGProps, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -10,13 +10,35 @@ import {
 } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useActiveAccount } from "thirdweb/react";
+import { mintTo } from "thirdweb/extensions/erc1155";
+import { sendTransaction, getContract } from "thirdweb";
+import { useRouter } from "next/navigation";
+import { baseSepolia } from "thirdweb/chains";
+import { client } from "../../app/client";
 
+interface UploadResponse {
+  id: string;
+  filename: string;
+  s3Url: string;
+  generatedImageUrl: string;
+  ipfsUri: string;
+  uploadedAt: string;
+}
+const contract = getContract({
+  address: "0x916b9b486221d92c8705151E1834d306f44dc3a6",
+  chain: baseSepolia,
+  client: client,
+});
 export function UploadComponent() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadResult, setUploadResult] = useState<string | null>(null);
+  const router = useRouter();
+
+  const account = useActiveAccount();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -40,9 +62,14 @@ export function UploadComponent() {
         throw new Error("Upload failed");
       }
 
-      const data = await response.json();
+      const data: UploadResponse = await response.json();
       console.log("Upload successful:", data);
       setUploadComplete(true);
+
+      await mintNFT(data);
+
+      // router.push("/gallery");
+      setUploadResult("NFT minted successfully!");
     } catch (err) {
       console.error("Upload error:", err);
       setError("Failed to upload image. Please try again.");
@@ -50,7 +77,40 @@ export function UploadComponent() {
       setUploading(false);
     }
   };
+  const mintNFT = async (uploadData: UploadResponse) => {
+    try {
+      if (!account) {
+        throw new Error("No active account");
+      }
 
+      const nftName = uploadData.filename.replace(/\.webp$/, "");
+
+      const transaction = mintTo({
+        contract,
+        to: account.address,
+        supply: BigInt(1),
+        nft: {
+          name: nftName,
+          description: "TimeScape AI generated image",
+          image: uploadData.ipfsUri,
+          attributes: {
+            id: uploadData.id,
+            s3Url: uploadData.s3Url,
+            ipfsUri: uploadData.ipfsUri,
+            uploadedAt: uploadData.uploadedAt,
+          },
+        },
+      });
+
+      const transactionHash = await sendTransaction({
+        account,
+        transaction,
+      });
+      console.log("Transaction sent:", transactionHash);
+    } catch (error) {
+      console.error("Minting error:", error);
+    }
+  };
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
@@ -94,7 +154,7 @@ export function UploadComponent() {
               </div>
             )}
             {uploadComplete && (
-              <Link href="/view-generation" passHref>
+              <Link href="/gallery" passHref>
                 <Button
                   variant="outline"
                   className="mt-4 text-primary hover:bg-primary hover:text-primary-foreground"
@@ -132,7 +192,7 @@ export function UploadComponent() {
   );
 }
 
-function CheckIcon(props) {
+function CheckIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -151,7 +211,7 @@ function CheckIcon(props) {
   );
 }
 
-function UploadIcon(props) {
+function UploadIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

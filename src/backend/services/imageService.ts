@@ -8,7 +8,7 @@ import { generateImage } from "./replicateService";
 import Image from "../models/Image";
 import fs from "fs";
 import { File } from "@web-std/file";
-import fetch, { Blob } from "node-fetch";
+import fetch from "node-fetch";
 
 const thirdwebClient = createThirdwebClient({
   clientId: THIRDWEB_CLIENT_ID,
@@ -29,24 +29,37 @@ export const uploadImageToS3 = async (file: Express.Multer.File) => {
   return `https://${S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${uploadParams.Key}`;
 };
 
-// store return image to THIRDWEB > IPFS
 export const uploadImageToThirdWeb = async (
   imageUrl: string
 ): Promise<string> => {
-  // Fetch the image from the URL
-  const response = await fetch(imageUrl);
-  // Get the binary data as an ArrayBuffer
-  const arrayBuffer = await response.arrayBuffer();
-  // Convert ArrayBuffer to Buffer
-  const buffer = Buffer.from(arrayBuffer);
+  try {
+    console.log("Fetching image from:", imageUrl);
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-  const uri = await upload({
-    client: thirdwebClient,
-    files: [new File([buffer], "image.webp", { type: "image/webp" })],
-  });
+    // Get the image data as an ArrayBuffer
+    const imageArrayBuffer = await response.arrayBuffer();
 
-  console.log("Uploaded image URI: ", uri);
-  return uri;
+    console.log("Uploading to IPFS...");
+    // Upload the ArrayBuffer directly to IPFS
+    const uris = await upload({
+      client: thirdwebClient,
+      files: [new Uint8Array(imageArrayBuffer)],
+    });
+
+    console.log("Uploaded image URIs: ", uris);
+
+    if (uris.length === 0 || !uris[0].startsWith("ipfs://")) {
+      throw new Error(`Invalid IPFS URI format: ${uris}`);
+    }
+
+    return uris[0];
+  } catch (error) {
+    console.error("Error uploading image to IPFS:", error);
+    throw error;
+  }
 };
 
 // -- Main Function
