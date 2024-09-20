@@ -25,11 +25,13 @@ interface UploadResponse {
   ipfsUri: string;
   uploadedAt: string;
 }
+
 const contract = getContract({
   address: "0x916b9b486221d92c8705151E1834d306f44dc3a6",
   chain: baseSepolia,
   client: client,
 });
+
 export function UploadComponent() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -66,6 +68,10 @@ export function UploadComponent() {
       console.log("Upload successful:", data);
       setUploadComplete(true);
 
+      console.log(
+        "About to mint NFT with data:",
+        JSON.stringify(data, null, 2)
+      );
       await mintNFT(data);
 
       // router.push("/gallery");
@@ -77,13 +83,20 @@ export function UploadComponent() {
       setUploading(false);
     }
   };
+
   const mintNFT = async (uploadData: UploadResponse) => {
     try {
       if (!account) {
         throw new Error("No active account");
       }
 
+      console.log(
+        "Minting NFT with data:",
+        JSON.stringify(uploadData, null, 2)
+      );
+
       const nftName = uploadData.filename.replace(/\.webp$/, "");
+      console.log("NFT Name:", nftName);
 
       const transaction = mintTo({
         contract,
@@ -102,11 +115,20 @@ export function UploadComponent() {
         },
       });
 
+      console.log("Minting transaction prepared:", transaction);
+
       const transactionHash = await sendTransaction({
         account,
         transaction,
       });
-      console.log("Transaction sent:", transactionHash);
+      console.log("Transaction sent. Hash:", transactionHash);
+
+      // You might want to add a delay here before checking the transaction status
+      // await new Promise(resolve => setTimeout(resolve, 5000)); // 5 second delay
+
+      // Optionally, you could add code here to check the transaction status
+      // const receipt = await getTransactionReceipt(transactionHash);
+      // console.log("Transaction receipt:", receipt);
     } catch (error) {
       console.error("Minting error:", error);
     }

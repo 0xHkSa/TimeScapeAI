@@ -51,11 +51,12 @@ export const uploadImageToThirdWeb = async (
 
     console.log("Uploaded image URIs: ", uris);
 
-    if (uris.length === 0 || !uris[0].startsWith("ipfs://")) {
-      throw new Error(`Invalid IPFS URI format: ${uris}`);
-    }
+    // if (uris.length === 0 || !uris[0].startsWith("ipfs://")) {
+    //   throw new Error(`Invalid IPFS URI format: ${uris}`);
+    // }
+    // return uris[0];
 
-    return uris[0];
+    return uris;
   } catch (error) {
     console.error("Error uploading image to IPFS:", error);
     throw error;

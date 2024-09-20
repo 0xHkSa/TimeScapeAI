@@ -22,8 +22,6 @@ export async function generateImage(prompt: string): Promise<string> {
       }
     );
 
-    console.log("Replicate response:", output);
-
     if (Array.isArray(output) && output.length > 0) {
       return output[0];
     } else if (
