@@ -5,6 +5,14 @@ const replicate = new Replicate({
   auth: REPLICATE_API_TOKEN,
 });
 
+interface ReplicateOutput {
+  output?: string[];
+}
+
+function isReplicateOutput(output: unknown): output is ReplicateOutput {
+  return typeof output === "object" && output !== null && "output" in output;
+}
+
 export async function generateImage(prompt: string): Promise<string> {
   try {
     const output = await replicate.run(
@@ -14,11 +22,17 @@ export async function generateImage(prompt: string): Promise<string> {
       }
     );
 
-    return Array.isArray(output)
-      ? output[0]
-      : typeof output === "object"
-      ? JSON.stringify(output)
-      : String(output);
+    if (Array.isArray(output) && output.length > 0) {
+      return output[0];
+    } else if (
+      isReplicateOutput(output) &&
+      Array.isArray(output.output) &&
+      output.output.length > 0
+    ) {
+      return output.output[0];
+    } else {
+      throw new Error("Unexpected output format from Replicate API");
+    }
   } catch (error) {
     console.error("Error generating image:", error);
     throw error;

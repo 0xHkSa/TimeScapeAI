@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { JSX, SVGProps, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -10,6 +10,27 @@ import {
 } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useActiveAccount } from "thirdweb/react";
+import { mintTo } from "thirdweb/extensions/erc1155";
+import { sendTransaction, getContract } from "thirdweb";
+import { useRouter } from "next/navigation";
+import { baseSepolia } from "thirdweb/chains";
+import { client } from "../../app/client";
+
+interface UploadResponse {
+  id: string;
+  filename: string;
+  s3Url: string;
+  generatedImageUrl: string;
+  ipfsUri: string;
+  uploadedAt: string;
+}
+
+const contract = getContract({
+  address: "0x916b9b486221d92c8705151E1834d306f44dc3a6",
+  chain: baseSepolia,
+  client: client,
+});
 
 export function UploadComponent() {
   const [file, setFile] = useState<File | null>(null);
@@ -17,6 +38,9 @@ export function UploadComponent() {
   const [uploadComplete, setUploadComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadResult, setUploadResult] = useState<string | null>(null);
+  const router = useRouter();
+
+  const account = useActiveAccount();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -40,9 +64,18 @@ export function UploadComponent() {
         throw new Error("Upload failed");
       }
 
-      const data = await response.json();
+      const data: UploadResponse = await response.json();
       console.log("Upload successful:", data);
       setUploadComplete(true);
+
+      console.log(
+        "About to mint NFT with data:",
+        JSON.stringify(data, null, 2)
+      );
+      await mintNFT(data);
+
+      // router.push("/gallery");
+      setUploadResult("NFT minted successfully!");
     } catch (err) {
       console.error("Upload error:", err);
       setError("Failed to upload image. Please try again.");
@@ -51,6 +84,55 @@ export function UploadComponent() {
     }
   };
 
+  const mintNFT = async (uploadData: UploadResponse) => {
+    try {
+      if (!account) {
+        throw new Error("No active account");
+      }
+
+      console.log(
+        "Minting NFT with data:",
+        JSON.stringify(uploadData, null, 2)
+      );
+
+      const nftName = uploadData.filename.replace(/\.webp$/, "");
+      console.log("NFT Name:", nftName);
+
+      const transaction = mintTo({
+        contract,
+        to: account.address,
+        supply: BigInt(1),
+        nft: {
+          name: nftName,
+          description: "TimeScape AI generated image",
+          image: uploadData.ipfsUri,
+          attributes: {
+            id: uploadData.id,
+            s3Url: uploadData.s3Url,
+            ipfsUri: uploadData.ipfsUri,
+            uploadedAt: uploadData.uploadedAt,
+          },
+        },
+      });
+
+      console.log("Minting transaction prepared:", transaction);
+
+      const transactionHash = await sendTransaction({
+        account,
+        transaction,
+      });
+      console.log("Transaction sent. Hash:", transactionHash);
+
+      // You might want to add a delay here before checking the transaction status
+      // await new Promise(resolve => setTimeout(resolve, 5000)); // 5 second delay
+
+      // Optionally, you could add code here to check the transaction status
+      // const receipt = await getTransactionReceipt(transactionHash);
+      // console.log("Transaction receipt:", receipt);
+    } catch (error) {
+      console.error("Minting error:", error);
+    }
+  };
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
@@ -94,7 +176,7 @@ export function UploadComponent() {
               </div>
             )}
             {uploadComplete && (
-              <Link href="/view-generation" passHref>
+              <Link href="/gallery" passHref>
                 <Button
                   variant="outline"
                   className="mt-4 text-primary hover:bg-primary hover:text-primary-foreground"
@@ -132,7 +214,7 @@ export function UploadComponent() {
   );
 }
 
-function CheckIcon(props) {
+function CheckIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -151,7 +233,7 @@ function CheckIcon(props) {
   );
 }
 
-function UploadIcon(props) {
+function UploadIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

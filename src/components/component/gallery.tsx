@@ -20,7 +20,7 @@ export default function Gallery() {
     async function fetchNFTs() {
       const contract = getContract({
         client,
-        address: "0xD37B25c14E4F538A2C17aEC2Ba90a1105a35BC8B",
+        address: "0x916b9b486221d92c8705151E1834d306f44dc3a6",
         chain: baseSepolia,
       });
 
@@ -47,7 +47,7 @@ export default function Gallery() {
       if (account) {
         const contract = getContract({
           client,
-          address: "0xD37B25c14E4F538A2C17aEC2Ba90a1105a35BC8B",
+          address: "0x916b9b486221d92c8705151E1834d306f44dc3a6",
           chain: baseSepolia,
         });
 
