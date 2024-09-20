@@ -196,7 +196,7 @@ export function UploadComponent() {
             {uploading && (
               <div className="flex items-center gap-2">
                 <div className="h-6 w-6 animate-spin text-primary" />
-                <span className="text-sm font-medium">Uploading...</span>
+                {/* <span className="text-sm font-medium">Uploading...</span> */}
               </div>
             )}
             {uploadComplete && (
