@@ -59,7 +59,7 @@ export function UploadComponent() {
     let interval: NodeJS.Timeout;
     if (isProcessing && progress < 90) {
       interval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 1, 90));
+        setProgress((prev) => Math.min(prev + 0.5, 90));
       }, 200);
     }
     return () => clearInterval(interval);
@@ -82,30 +82,26 @@ export function UploadComponent() {
     try {
       setProgress(0);
       setIsProcessing(true);
-      setCurrentStage("Uploading to S3");
+      setCurrentStage("Generating AI Image");
 
-      // S3 Upload
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+
       const response = await fetch("http://localhost:5002/api/images/upload", {
         method: "POST",
         body: formData,
       });
       if (!response.ok) throw new Error("Upload failed");
 
-      setProgress(20); // Set progress to 20% after S3 upload
-      setCurrentStage("Generating AI Image");
       const data: UploadResponse = await response.json();
 
-      // Simulate longer AI processing time
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
-      setProgress(90); // Jump to 90% after AI generation
-      setCurrentStage("Preparing transaction");
+      setProgress(90);
+      setCurrentStage("Minting NFT");
       console.log(
         "About to mint NFT with data:",
         JSON.stringify(data, null, 2)
       );
 
-      setCurrentStage("Uploading to IPFS and Minting NFT");
       await mintNFT(data);
 
       setProgress(100);
