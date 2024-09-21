@@ -6,6 +6,7 @@ import { JSX, SVGProps } from "react";
 import { inAppWallet, createWallet } from "thirdweb/wallets";
 import { client } from "@/app/client";
 import { usePathname } from "next/navigation";
+import { baseSepolia } from "thirdweb/chains";
 
 interface HeaderProps {
   client: any; // Replace 'any' with the correct type from thirdweb
@@ -64,6 +65,7 @@ export function Header() {
         ))}
         <ConnectButton
           client={client}
+          chain={baseSepolia}
           wallets={wallets}
           connectButton={{
             label: "Log in",
