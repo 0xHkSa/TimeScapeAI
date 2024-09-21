@@ -28,7 +28,7 @@ interface UploadResponse {
 }
 
 const contract = getContract({
-  address: "0x916b9b486221d92c8705151E1834d306f44dc3a6",
+  address: "0xD8c314A762fc2eDf34ac7E582c4F2413ACe839D3",
   chain: baseSepolia,
   client: client,
 });
