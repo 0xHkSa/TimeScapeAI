@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, SVGProps, useState } from "react";
+import { JSX, SVGProps, useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useActiveAccount } from "thirdweb/react";
@@ -27,7 +28,7 @@ interface UploadResponse {
 }
 
 const contract = getContract({
-  address: "0x916b9b486221d92c8705151E1834d306f44dc3a6",
+  address: "0xD8c314A762fc2eDf34ac7E582c4F2413ACe839D3",
   chain: baseSepolia,
   client: client,
 });
@@ -39,8 +40,30 @@ export function UploadComponent() {
   const [error, setError] = useState<string | null>(null);
   const [uploadResult, setUploadResult] = useState<string | null>(null);
   const router = useRouter();
+  const [progress, setProgress] = useState(0);
+  const [currentStage, setCurrentStage] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const account = useActiveAccount();
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isProcessing && progress < 90) {
+      interval = setInterval(() => {
+        setProgress((prev) => Math.min(prev + 0.5, 90));
+      }, 200);
+    }
+    return () => clearInterval(interval);
+  }, [isProcessing, progress]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -51,36 +74,45 @@ export function UploadComponent() {
     setError(null);
     setUploadComplete(false);
     setUploadResult(null);
+    setPreviewUrl(URL.createObjectURL(selectedFile));
 
     const formData = new FormData();
     formData.append("image", selectedFile);
 
     try {
+      setProgress(0);
+      setIsProcessing(true);
+      setCurrentStage("Generating AI Image");
+
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+
       const response = await fetch("http://localhost:5002/api/images/upload", {
         method: "POST",
         body: formData,
       });
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
+      if (!response.ok) throw new Error("Upload failed");
 
       const data: UploadResponse = await response.json();
-      console.log("Upload successful:", data);
-      setUploadComplete(true);
 
+      setProgress(90);
+      setCurrentStage("Minting NFT");
       console.log(
         "About to mint NFT with data:",
         JSON.stringify(data, null, 2)
       );
+
       await mintNFT(data);
 
-      // router.push("/gallery");
+      setProgress(100);
+      setCurrentStage("Complete");
+      setUploadComplete(true);
       setUploadResult("NFT minted successfully!");
     } catch (err) {
-      console.error("Upload error:", err);
-      setError("Failed to upload image. Please try again.");
+      // ... error handling
     } finally {
       setUploading(false);
+      setIsProcessing(false);
     }
   };
 
@@ -122,13 +154,6 @@ export function UploadComponent() {
         transaction,
       });
       console.log("Transaction sent. Hash:", transactionHash);
-
-      // You might want to add a delay here before checking the transaction status
-      // await new Promise(resolve => setTimeout(resolve, 5000)); // 5 second delay
-
-      // Optionally, you could add code here to check the transaction status
-      // const receipt = await getTransactionReceipt(transactionHash);
-      // console.log("Transaction receipt:", receipt);
     } catch (error) {
       console.error("Minting error:", error);
     }
@@ -138,7 +163,7 @@ export function UploadComponent() {
       <CardHeader>
         <CardTitle>Upload Your Photo</CardTitle>
         <CardDescription>
-          Help TimeScape AI analyze your photos by uploading them here.
+          TimeScape AI will analyze your photos by uploading them here.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -159,12 +184,19 @@ export function UploadComponent() {
             />
           </label>
         )}
+
+        {uploading && (
+          <div className="space-y-2">
+            <Progress value={progress} className="w-full" />
+            <p className="text-sm text-center">{currentStage}</p>
+          </div>
+        )}
         {file && (
           <div className="flex flex-col items-center justify-center gap-4">
             {uploading && (
               <div className="flex items-center gap-2">
                 <div className="h-6 w-6 animate-spin text-primary" />
-                <span className="text-sm font-medium">Uploading...</span>
+                {/* <span className="text-sm font-medium">Uploading...</span> */}
               </div>
             )}
             {uploadComplete && (
@@ -190,14 +222,20 @@ export function UploadComponent() {
               <div className="text-sm font-medium text-red-500">{error}</div>
             )}
             <div className="flex items-center gap-2">
-              <img
-                src="/placeholder.svg"
-                alt="Uploaded file"
-                width={120}
-                height={120}
-                className="rounded-md object-cover"
-                style={{ aspectRatio: "120/120", objectFit: "cover" }}
-              />
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Uploaded file"
+                  width={120}
+                  height={120}
+                  className="rounded-md object-cover"
+                  style={{ aspectRatio: "120/120", objectFit: "cover" }}
+                />
+              ) : (
+                <div className="w-[120px] h-[120px] bg-gray-200 rounded-md flex items-center justify-center">
+                  <span className="text-gray-400">No preview</span>
+                </div>
+              )}
               <div className="text-left">
                 <div className="font-medium">{file.name}</div>
                 <div className="text-sm text-muted-foreground">
