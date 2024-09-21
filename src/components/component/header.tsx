@@ -71,7 +71,7 @@ export function Header() {
             label: "Log in",
             className: "px-8 py-3 rounded-full text-sm font-medium",
             style: {
-              backgroundColor: "#1d1d38",
+              backgroundColor: "#1c1c2e",
               color: "white",
               borderRadius: "9999px",
             },
