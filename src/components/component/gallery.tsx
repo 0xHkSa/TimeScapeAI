@@ -148,11 +148,11 @@ export default function Gallery() {
                       client={client}
                     />
                   </CardContent>
-                  <CardFooter className="bg-muted text-muted-foreground p-3 rounded-b-lg">
-                    <div className="font-medium">
+                  <CardFooter className="bg-muted text-muted-foreground p-3 rounded-b-lg flex flex-col items-start">
+                    <div className="font-medium truncate w-full">
                       {nft.metadata.name || `NFT ${i + 1}`}
                     </div>
-                    <div className="text-sm">
+                    <div className="text-sm mt-1 line-clamp-2 w-full">
                       {nft.metadata.description || "No description available."}
                     </div>
                   </CardFooter>
