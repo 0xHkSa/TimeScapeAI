@@ -3,11 +3,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { UploadComponent } from "./UploadComponent";
-import { JSX, SVGProps } from "react";
+import { JSX, SVGProps, useEffect } from "react";
 import { useState } from "react";
-import { client } from "@/app/client";
-import { ConnectButton } from "thirdweb/react";
-import { inAppWallet, createWallet } from "thirdweb/wallets";
 
 export default function LandingPage() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
@@ -36,48 +33,76 @@ export default function LandingPage() {
       console.error("getUserMedia is not supported on this device");
     }
   };
+
+  useEffect(() => {
+    const uploadContainer = document.getElementById("upload-container");
+    const body = document.body;
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "style"
+        ) {
+          const isModalVisible = uploadContainer?.style.display === "flex";
+          body.style.overflow = isModalVisible ? "hidden" : "";
+        }
+      });
+    });
+
+    if (uploadContainer) {
+      observer.observe(uploadContainer, { attributes: true });
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const toggleUploadModal = (show: boolean) => {
+    const uploadContainer = document.getElementById("upload-container");
+    if (uploadContainer) {
+      uploadContainer.style.display = show ? "flex" : "none";
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <main className="flex-1">
-        <section className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48 bg-gradient-to-r from-[#6F2DA8] to-[#9370DB] mt-8">
+        <section className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48 bg-gradient-to-r from-[#6F2DA8] to-[#9370DB] ">
           <div className="container px-4 md:px-6 text-center">
-            <div className="max-w-3xl mx-auto space-y-6">
-              <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl">
+            <div className="max-w-3xl mx-auto ">
+              <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl mb-6">
                 Unlock the Past with TimeScape AI
               </h1>
-              <p className="text-lg text-white/80 md:text-xl">
+              <p className="text-lg text-white/80 md:text-xl mt-6 mb-16">
                 Capture a photo and let our AI transform it into a stunning
                 visual representation of the past.
               </p>
-
-              <Button
-                size="lg"
-                className="px-8 py-3 rounded-full"
-                onClick={() => {
-                  const uploadContainer =
-                    document.getElementById("upload-container");
-                  if (uploadContainer) {
-                    uploadContainer.style.display = "flex";
-                  }
-                }}
-              >
-                Upload Photo
-              </Button>
+              <div className="flex flex-col items-center">
+                <Button
+                  size="lg"
+                  className="px-8 py-3 rounded-full h-16 text-xl mb-6"
+                  onClick={() => toggleUploadModal(true)}
+                >
+                  Upload Photo
+                </Button>
+              </div>
               <div
                 id="upload-container"
-                className="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 justify-center items-center"
+                className="hidden fixed inset-0 bg-black bg-opacity-50 justify-center items-center z-50"
                 onClick={(e) => {
                   if (e.target === e.currentTarget) {
-                    e.currentTarget.style.display = "none";
+                    toggleUploadModal(false);
                   }
                 }}
               >
-                <UploadComponent />
+                <div className="max-h-[90vh] overflow-y-auto">
+                  <UploadComponent />
+                </div>
               </div>
               <div>
                 <Button
                   size="lg"
-                  className="px-8 py-3 rounded-full"
+                  className="px-8 py-3 rounded-full h-16 text-xl"
                   onClick={startCamera}
                 >
                   Take a Photo
