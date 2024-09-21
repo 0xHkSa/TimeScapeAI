@@ -7,6 +7,7 @@ import { inAppWallet, createWallet } from "thirdweb/wallets";
 import { client } from "@/app/client";
 import { usePathname } from "next/navigation";
 import { baseSepolia } from "thirdweb/chains";
+import { motion } from "framer-motion";
 
 interface HeaderProps {
   client: any; // Replace 'any' with the correct type from thirdweb
@@ -22,6 +23,7 @@ const wallets = [
   createWallet("io.metamask"),
   createWallet("com.coinbase.wallet"),
 ];
+
 export function Header() {
   const pathname = usePathname();
 
@@ -32,58 +34,87 @@ export function Header() {
     { name: "Contact", href: "/#contact" },
   ];
 
+  const headerVariants = {
+    hidden: { y: -50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: -20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.3 } },
+  };
+
   return (
-    <header className="px-4 lg:px-6 h-14 flex items-center">
-      <Link
-        href="/"
-        className="flex items-center justify-center"
-        prefetch={false}
-        aria-label="Home"
-      >
-        <CameraIcon className="h-6 w-6 mr-2" />
-        <span className="text-lg font-semibold">Time Scape AI</span>
-      </Link>
+    <motion.header
+      className="px-4 lg:px-6 h-14 flex items-center"
+      initial="hidden"
+      animate="visible"
+      variants={headerVariants}
+    >
+      <motion.div variants={itemVariants}>
+        <Link
+          href="/"
+          className="flex items-center justify-center"
+          prefetch={false}
+          aria-label="Home"
+        >
+          <CameraIcon className="h-6 w-6 mr-2" />
+          <span className="text-lg font-semibold">Time Scape AI</span>
+        </Link>
+      </motion.div>
       <nav className="ml-auto flex items-center gap-4 sm:gap-6">
         {navItems.map(({ name, href }) => (
-          <Link
-            key={name}
-            href={href}
-            className={`text-sm font-medium hover:underline underline-offset-4 ${
-              pathname === href ? "text-primary" : ""
-            }`}
-            prefetch={false}
-            onClick={(e) => {
-              if (href.startsWith("/#") && pathname === "/") {
-                e.preventDefault();
-                const element = document.getElementById(href.substring(2));
-                element?.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-          >
-            {name}
-          </Link>
+          <motion.div key={name} variants={itemVariants}>
+            <Link
+              href={href}
+              className={`text-sm font-medium hover:underline underline-offset-4 ${
+                pathname === href ? "text-primary" : ""
+              }`}
+              prefetch={false}
+              onClick={(e) => {
+                if (href.startsWith("/#") && pathname === "/") {
+                  e.preventDefault();
+                  const element = document.getElementById(href.substring(2));
+                  element?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+            >
+              {name}
+            </Link>
+          </motion.div>
         ))}
-        <ConnectButton
-          client={client}
-          chain={baseSepolia}
-          wallets={wallets}
-          connectButton={{
-            label: "Log in",
-            className: "px-8 py-3 rounded-full text-sm font-medium",
-            style: {
-              backgroundColor: "#1c1c2e",
-              color: "white",
-              borderRadius: "9999px",
-            },
-          }}
-          connectModal={{
-            size: "compact",
-            title: "Sign in",
-            showThirdwebBranding: false,
-          }}
-        />
+        <motion.div variants={itemVariants}>
+          <ConnectButton
+            client={client}
+            chain={baseSepolia}
+            wallets={wallets}
+            theme={"light"}
+            connectButton={{
+              label: "Log in",
+              className: "px-8 py-3 rounded-full text-sm font-medium",
+              style: {
+                backgroundColor: "#fbf9d0",
+                color: "black",
+                borderRadius: "9999px",
+              },
+            }}
+            connectModal={{
+              size: "compact",
+              title: "Sign in",
+              showThirdwebBranding: false,
+            }}
+          />
+        </motion.div>
       </nav>
-    </header>
+    </motion.header>
   );
 }
 

@@ -5,11 +5,29 @@ import { Button } from "@/components/ui/button";
 import { UploadComponent } from "./UploadComponent";
 import { JSX, SVGProps, useEffect } from "react";
 import { useState } from "react";
-
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { CircleCheckIcon } from "lucide-react";
 
 export default function LandingPage() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  useEffect(() => {
+    const body = document.body;
+    body.style.overflow = isUploadModalOpen ? "hidden" : "";
+
+    return () => {
+      body.style.overflow = "";
+    };
+  }, [isUploadModalOpen]);
+
+  const toggleUploadModal = (show: boolean) => {
+    setIsUploadModalOpen(show);
+    const uploadContainer = document.getElementById("upload-container");
+    if (uploadContainer) {
+      uploadContainer.style.display = show ? "flex" : "none";
+    }
+  };
 
   const startCamera = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -59,13 +77,6 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  const toggleUploadModal = (show: boolean) => {
-    const uploadContainer = document.getElementById("upload-container");
-    if (uploadContainer) {
-      uploadContainer.style.display = show ? "flex" : "none";
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <main className="flex-1">
@@ -108,19 +119,37 @@ export default function LandingPage() {
                   </Button>
                 </motion.div>
               </div>
-              <div
-                id="upload-container"
-                className="hidden fixed inset-0 bg-black bg-opacity-50 justify-center items-center z-50"
-                onClick={(e) => {
-                  if (e.target === e.currentTarget) {
-                    toggleUploadModal(false);
-                  }
-                }}
-              >
-                <div className="max-h-[90vh] overflow-y-auto">
-                  <UploadComponent />
-                </div>
-              </div>
+              <AnimatePresence>
+                {isUploadModalOpen && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) {
+                        toggleUploadModal(false);
+                      }
+                    }}
+                    id="upload-container"
+                  >
+                    <motion.div
+                      initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                      animate={{ scale: 1, y: 0, opacity: 1 }}
+                      exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                      transition={{
+                        type: "spring",
+                        damping: 15,
+                        stiffness: 300,
+                      }}
+                      className="bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto"
+                    >
+                      <UploadComponent />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -185,7 +214,7 @@ export default function LandingPage() {
               </div>
             </div>
           </motion.div>
-          <div className="absolute inset-0 bg-[url('/path/to/texture-image.jpg')] opacity-10 mix-blend-overlay"></div>
+          <div className="absolute inset-0 opacity-10 mix-blend-overlay"></div>
           <motion.div
             animate={{
               scale: [1, 1.1, 1],
@@ -380,10 +409,9 @@ export default function LandingPage() {
     </div>
   );
 }
-
-function CircleCheckIcon(
-  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
-) {
+import React from "react";
+interface Props extends React.SVGProps<SVGSVGElement> {}
+function Component({ ...props }: Props) {
   return (
     <svg
       {...props}
