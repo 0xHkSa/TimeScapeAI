@@ -5,9 +5,29 @@ import { Button } from "@/components/ui/button";
 import { UploadComponent } from "./UploadComponent";
 import { JSX, SVGProps, useEffect } from "react";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CircleCheckIcon } from "lucide-react";
 
 export default function LandingPage() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  useEffect(() => {
+    const body = document.body;
+    body.style.overflow = isUploadModalOpen ? "hidden" : "";
+
+    return () => {
+      body.style.overflow = "";
+    };
+  }, [isUploadModalOpen]);
+
+  const toggleUploadModal = (show: boolean) => {
+    setIsUploadModalOpen(show);
+    const uploadContainer = document.getElementById("upload-container");
+    if (uploadContainer) {
+      uploadContainer.style.display = show ? "flex" : "none";
+    }
+  };
 
   const startCamera = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -57,57 +77,91 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  const toggleUploadModal = (show: boolean) => {
-    const uploadContainer = document.getElementById("upload-container");
-    if (uploadContainer) {
-      uploadContainer.style.display = show ? "flex" : "none";
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <main className="flex-1">
-        <section className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48 bg-gradient-to-r from-[#6F2DA8] to-[#9370DB] ">
-          <div className="container px-4 md:px-6 text-center">
-            <div className="max-w-3xl mx-auto ">
-              <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl mb-6">
+        <section className="w-full py-12 sm:py-24 md:py-32 lg:py-40 xl:py-48 bg-gradient-to-r from-[#6F2DA8] to-[#9370DB] relative overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="container px-4 md:px-6 text-center relative z-10"
+          >
+            <div className="max-w-3xl mx-auto">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl mb-6"
+              >
                 Unlock the Past with TimeScape AI
-              </h1>
-              <p className="text-lg text-white/80 md:text-xl mt-6 mb-16">
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+                className="text-lg text-white/80 md:text-xl mt-6 mb-16"
+              >
                 Capture a photo and let our AI transform it into a stunning
                 visual representation of the past.
-              </p>
+              </motion.p>
               <div className="flex flex-col items-center">
-                <Button
-                  size="lg"
-                  className="px-8 py-3 rounded-full h-16 text-xl mb-6"
-                  onClick={() => toggleUploadModal(true)}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Upload Photo
-                </Button>
+                  <Button
+                    size="lg"
+                    className="px-8 py-3 rounded-full h-16 text-xl mb-6 bg-white text-[#6F2DA8] hover:bg-[#9370DB] hover:text-white transition-colors duration-300"
+                    onClick={() => toggleUploadModal(true)}
+                  >
+                    Upload Photo
+                  </Button>
+                </motion.div>
               </div>
-              <div
-                id="upload-container"
-                className="hidden fixed inset-0 bg-black bg-opacity-50 justify-center items-center z-50"
-                onClick={(e) => {
-                  if (e.target === e.currentTarget) {
-                    toggleUploadModal(false);
-                  }
-                }}
+              <AnimatePresence>
+                {isUploadModalOpen && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) {
+                        toggleUploadModal(false);
+                      }
+                    }}
+                    id="upload-container"
+                  >
+                    <motion.div
+                      initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                      animate={{ scale: 1, y: 0, opacity: 1 }}
+                      exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                      transition={{
+                        type: "spring",
+                        damping: 15,
+                        stiffness: 300,
+                      }}
+                      className="bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto"
+                    >
+                      <UploadComponent />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <div className="max-h-[90vh] overflow-y-auto">
-                  <UploadComponent />
-                </div>
-              </div>
-              <div>
                 <Button
                   size="lg"
-                  className="px-8 py-3 rounded-full h-16 text-xl"
+                  className="px-8 py-3 rounded-full h-16 text-xl bg-transparent border-2 border-white text-white hover:bg-white hover:text-[#6F2DA8] transition-colors duration-300"
                   onClick={startCamera}
                 >
                   Take a Photo
                 </Button>
-              </div>
+              </motion.div>
               <div
                 id="camera-container"
                 className="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 justify-center items-center"
@@ -159,7 +213,32 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
+          <div className="absolute inset-0 opacity-10 mix-blend-overlay"></div>
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+              rotate: [0, 5, -5, 0],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            className="absolute -bottom-16 -left-16 w-64 h-64 bg-purple-400 rounded-full filter blur-3xl opacity-20"
+          ></motion.div>
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, -5, 5, 0],
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            className="absolute -top-16 -right-16 w-64 h-64 bg-indigo-400 rounded-full filter blur-3xl opacity-20"
+          ></motion.div>
         </section>
         <section
           id="about"
@@ -330,10 +409,9 @@ export default function LandingPage() {
     </div>
   );
 }
-
-function CircleCheckIcon(
-  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
-) {
+import React from "react";
+interface Props extends React.SVGProps<SVGSVGElement> {}
+function Component({ ...props }: Props) {
   return (
     <svg
       {...props}
